@@ -29,14 +29,17 @@ library(data.table)
 library(tidyverse)
 wine <- read.csv("wine_data.csv")
 setDT(wine)
+variety <- wine[, .(Count = .N-1), by = .(variety)][order(-Count)]
+setDT(variety)
+head(variety, 10)
 avg_points <- wine[,mean(points), by = country] 
-avg_points
+avg_points[order(-V1)]
 avg_price <- wine[,mean(na.omit((price))), by = province]
-a <- avg_price[order(-V1)]
-a[1]
-US_avg_price <- wine[, mean(na.omit(price)), by = .(country,province)]
-b <- US_avg_price[order(-V1,country)]
-b[5]
-tab <- wine[,designation]
-g <- grep("20 [Yy]ear[Ss]|20-[Yy]ear[Ss]|20-[Yy]ear[Ss]-[Oo]ld|20 [Yy]ear|20-[Yy]ear|20-[Yy]ear-[Oo]ld", tab)
-length(g)
+highest_avg_price <- avg_price[order(-V1)]
+highest_avg_price[1]
+US_avg_price <- wine[, mean(na.omit(price)), by = .(country,province)][order(-country,-V1)]
+US_highest_price <- US_highest_price %>% filter(country == "US")
+head(US_highest_price, 1)
+designation <- wine[, designation]
+twenty_year_old <- grep("20 [Yy]ear[Ss]|20-[Yy]ear[Ss]|20-[Yy]ear[Ss]-[Oo]ld|20 [Yy]ear|20-[Yy]ear|20-[Yy]ear-[Oo]ld", designation)
+length(twenty_year_old)
