@@ -1,0 +1,56 @@
+#Homewrok 2
+#Smit Patil
+#Section 03
+
+```{r}
+#Question 1
+library(dplyr)
+library(data.table)
+library(ggplot2)
+library(tidyr)
+library(gridExtra)
+airlines_delay <- read.csv("airlines_delay.csv")
+setDT(airlines_delay)
+top_carriers_delay <- airlines_delay[, .(arr_delay = .N), by = .(carrier_name)][order(-arr_delay)][1:10]
+ggplot(data = top_carriers_delay, aes(x = carrier_name, y = arr_delay)) + 
+  geom_bar(stat="identity") + 
+  labs(x = "Carrier name", y = "Arrival delay (minutes)") +
+  coord_flip() + theme(text = element_text(size = 10))
+```
+```{r}
+#Question 2
+carriers_delay <- airlines_delay[, .(arr_delay= .N), by = .(carrier_name, year)][order(-arr_delay)]
+ggplot(data = carriers_delay, aes(x = carrier_name, y = arr_delay, fill = year)) + 
+  geom_bar(stat="identity") + 
+  labs(x = "Carrier name", y = "Arrival delay (minutes)") +
+  xlim("Alaska Airlines Inc.","American Airlines Inc.","American Eagle Airlines Inc.","Delta Air Lines Inc.","ExpressJet Airlines Inc.","Frontier Airlines Inc.","JetBlue Airways","SkyWest Airlines Inc.","Southwest Airlines Co.","United Air Lines Inc.") +
+  coord_flip() + theme(text = element_text(size = 10))
+```
+```{r}
+#Question 3
+long_delay <- airlines_delay %>% gather(delay_type, densities, carrier_delay:late_aircraft_delay)
+setDT(long_delay)
+long_delay <- long_delay[, .(delay_type, densities)]
+ggplot(long_delay, aes(x = log(densities), fill = delay_type)) + 
+  geom_density(alpha = 0.5) + 
+  labs(x = "Log delay in mins")
+```
+```{r}
+#Question 4
+sum_carrier <- airlines_delay %>% 
+  group_by(carrier) %>% 
+  summarise_if(is.numeric, sum, na.rm = TRUE)
+long_sum_carrier <- sum_carrier %>% gather(delay_type, sum_delay, -c(1:8))
+ggplot(long_sum_carrier, aes(delay_type, carrier, fill= sum_delay)) + 
+  geom_tile() + theme(text = element_text(size = 10))
+```
+```{r}
+#Question 5
+sum_year <- airlines_delay %>% 
+  group_by(year) %>% 
+  summarise_if(is.numeric, sum, na.rm = TRUE)
+long_sum_year <- sum_year %>% gather(delay_type, sum_delay, -c(1:7))
+ggplot(long_sum_year, aes(x = factor(year), y = sum_delay, group = delay_type, color = delay_type)) +
+  geom_line() + geom_point() +
+  theme(text = element_text(size = 10))
+```
